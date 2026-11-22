@@ -5,7 +5,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.15'
-  YASB_REF: feat/qtquick-widget-addons
+  YASB_REF: feat/qtquick-migration
 
 jobs:
   process:
