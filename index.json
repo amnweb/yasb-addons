@@ -1,6 +1,21 @@
 {
   "addons": [
     {
+      "id": "amnweb.catppuccin",
+      "type": "theme",
+      "author": "amnweb",
+      "title": "Catppuccin",
+      "description": "Catppuccin Mocha in dark mode and Latte in light mode, with a mauve accent",
+      "versions": [
+        {
+          "version": 1,
+          "released": "2026-11-22",
+          "yasbApi": 1,
+          "sha256": "c1e1ba0ab194eff0f7b3397c9a2b028de34ac71e1459013459162a13be7b2ccb"
+        }
+      ]
+    },
+    {
       "id": "amnweb.hwmonitor",
       "type": "widget",
       "author": "amnweb",
