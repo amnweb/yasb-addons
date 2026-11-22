@@ -1,0 +1,34 @@
+name: Check addon PR
+on:
+  pull_request:
+    paths:
+      - 'widgets/**'
+      - 'themes/**'
+      - 'layouts/**'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Keep released versions unchanged
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Reject changes to existing version folders
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          status=0
+          while IFS= read -r file; do
+            if [[ "$file" =~ ^(widgets|themes|layouts)/[^/]+/[^/]+/[0-9]+/ ]] && git cat-file -e "$BASE_SHA:${BASH_REMATCH[0]%/}" 2>/dev/null; then
+              echo "::error file=$file::${BASH_REMATCH[0]%/} is a released version, its files can't change"
+              status=1
+            fi
+          done < <(git diff --name-only "$BASE_SHA" HEAD -- widgets themes layouts)
+          exit $status

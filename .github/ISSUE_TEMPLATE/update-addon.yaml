@@ -1,0 +1,43 @@
+name: Update an addon
+description: Publish a new version of a widget, theme or layout you submitted before.
+title: "[update-addon]: "
+labels: ["addon-update"]
+body:
+  - type: upload
+    id: files
+    attributes:
+      label: Files
+      description: >-
+        A ZIP file with the new version, made the same way as your first one. Keep the `id` in `manifest.json` and
+        raise `version` above the last one.
+    validations:
+      required: true
+      accept: ".zip"
+  - type: textarea
+    id: changes
+    attributes:
+      label: What changed
+      description: What is new or fixed in this version. It is added to the change log in your addon's README.
+    validations:
+      required: true
+  - type: textarea
+    id: about
+    attributes:
+      label: About
+      description: A new text for the README of your addon. Leave it empty to keep the current one.
+  - type: upload
+    id: screenshot
+    attributes:
+      label: Screenshot
+      description: A new image of your addon, from 3:4 to 4:3. Leave it empty to keep the current one.
+    validations:
+      required: false
+      accept: ".png,.jpg,.jpeg"
+  - type: upload
+    id: images
+    attributes:
+      label: Images
+      description: New screenshots, at most 5; they replace all the current ones. Leave it empty to keep them.
+    validations:
+      required: false
+      accept: ".png,.jpg,.jpeg"

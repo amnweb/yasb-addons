@@ -1,0 +1,77 @@
+name: Submit an addon
+description: Add a new widget, theme or layout to the addon library.
+title: "[submit-addon]: "
+labels: ["addon"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - Widget
+        - Theme
+        - Layout
+    validations:
+      required: true
+  - type: upload
+    id: files
+    attributes:
+      label: Files
+      description: >-
+        A ZIP file with your `manifest.json` and your QML.
+        For a widget or layout, compress its folder, or the files themselves (`Clock.qml`, its other files and
+        `manifest.json`).
+        For a theme, compress its one `.qml` file and `manifest.json`.
+        The `id` in `manifest.json` must be `<your GitHub login>.<name>` in lower case, and the main QML file must be
+        named after `<name>`, such as `Clock.qml` for `yourlogin.clock`. `.exe` and `.dll` files are not accepted.
+    validations:
+      required: true
+      accept: ".zip"
+  - type: textarea
+    id: about
+    attributes:
+      label: About
+      description: >-
+        What your addon is, how to use it and what it needs. This text becomes the README of your addon.
+        Markdown is supported.
+      placeholder: |
+        A clock with the date in its popup. Click it to open the calendar.
+
+        Needs the Segoe Fluent Icons font.
+    validations:
+      required: true
+  - type: upload
+    id: screenshot
+    attributes:
+      label: Screenshot
+      description: >-
+        One image of your addon, square or close to it (from 3:4 to 4:3); it is cropped to a square.
+        Required for a widget or layout. For a theme it is optional: a palette of its colours is made for it.
+    validations:
+      required: false
+      accept: ".png,.jpg,.jpeg"
+  - type: upload
+    id: images
+    attributes:
+      label: Images
+      description: More screenshots of your addon in use, at most 5. Optional.
+    validations:
+      required: false
+      accept: ".png,.jpg,.jpeg"
+  - type: markdown
+    attributes:
+      value: |
+        `manifest.json` looks like this:
+
+        ```json
+        {
+          "id": "yourlogin.clock",
+          "title": "Clock",
+          "description": "A clock with the date in its popup",
+          "version": 1,
+          "released": "2026-11-22",
+          "yasbApi": 1
+        }
+        ```
+
+        To publish a new version later, use the **Update an addon** form.

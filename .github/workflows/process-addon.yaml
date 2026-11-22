@@ -1,0 +1,134 @@
+name: Process addon
+on:
+  issues:
+    types: [opened]
+
+env:
+  PYTHON_VERSION: '3.15'
+  YASB_REF: feat/qtquick-widget-addons
+
+jobs:
+  process:
+    name: Check the addon and open a PR
+    if: >-
+      startsWith(github.event.issue.title, '[submit-addon]:') ||
+      startsWith(github.event.issue.title, '[update-addon]:')
+    runs-on: windows-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      # The theme palette runs the submitted QML, so the token is not left in the checkout
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Find YASB ref
+        id: yasb
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ref="$YASB_REF"
+          if [ "$ref" = "latest-release" ]; then
+            ref="$(gh release view --repo amnweb/yasb --json tagName --jq .tagName)"
+          fi
+          echo "ref=${ref:?No YASB ref found}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout YASB repo
+        uses: actions/checkout@v6
+        with:
+          repository: amnweb/yasb
+          ref: ${{ steps.yasb.outputs.ref }}
+          path: yasb-repo
+          persist-credentials: false
+
+      - name: Install YASB dependencies
+        run: |
+          pip install ./yasb-repo
+
+      - name: Check the addon
+        shell: bash
+        env:
+          ADDON_AUTHOR: ${{ github.event.issue.user.login }}
+        run: |
+          python .github/scripts/process-addon.py
+
+      - name: Show error message
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo "# Addon not accepted ❌"
+            echo
+            if [ -s error.log ]; then
+              echo "Please fix the problem below and submit a new issue."
+              echo
+              echo '```text'
+              cat error.log
+              echo '```'
+            else
+              echo "The check stopped before it could say why. The maintainers will look at [the run]($RUN_URL)."
+            fi
+          } > comment.md
+          gh issue comment "$ISSUE_NUMBER" --body-file comment.md
+          gh issue close "$ISSUE_NUMBER"
+
+      - name: Create Pull Request
+        id: create-pr
+        uses: peter-evans/create-pull-request@v8
+        with:
+          add-paths: ${{ env.ADDON_PATH }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "${{ env.ADDON_ACTION }} ${{ env.ADDON_ID }} version ${{ env.ADDON_VERSION }}"
+          delete-branch: true
+          title: "${{ env.ADDON_ACTION }} ${{ env.ADDON_ID }} version ${{ env.ADDON_VERSION }}"
+          body: |
+            # ${{ env.ADDON_TITLE }}
+
+            * **Id**: ${{ env.ADDON_ID }}
+            * **Type**: ${{ env.ADDON_TYPE }}
+            * **Version**: ${{ env.ADDON_VERSION }}
+            * **Description**: ${{ env.ADDON_DESCRIPTION }}
+            * **Author**: @${{ github.event.issue.user.login }}
+
+            ${{ env.ADDON_CHANGES }}
+
+            Submitted in #${{ github.event.issue.number }}
+          base: main
+          branch: addon-${{ github.event.issue.number }}
+
+      - name: Comment the diff
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_URL: ${{ steps.create-pr.outputs.pull-request-url }}
+        run: |
+          gh pr comment "$PR_URL" --body-file addon-diff.md
+
+      - name: Close Issue
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          PR_URL: ${{ steps.create-pr.outputs.pull-request-url }}
+        run: |
+          gh issue close "$ISSUE_NUMBER" --comment "# Thank you for your addon! :tada:
+
+          It passed the checks and is in [this PR]($PR_URL). The maintainers will review it soon.
+
+          > If you have any questions, ask in the comments below or in the PR."
