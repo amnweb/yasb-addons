@@ -10,8 +10,7 @@
         {
           "version": 1,
           "released": "2026-11-22",
-          "yasbApi": 1,
-          "sha256": "c1e1ba0ab194eff0f7b3397c9a2b028de34ac71e1459013459162a13be7b2ccb"
+          "sha256": "48ff2ed67d5c985dd8a09a85131814966c45a7fe27af5250665ce51bf6ecf281"
         }
       ]
     },
@@ -25,8 +24,7 @@
         {
           "version": 1,
           "released": "2026-11-22",
-          "yasbApi": 1,
-          "sha256": "1e6c1aaa0c53d747bd677f7033b2f8f05c763529229ea7bafd907a432bfd62e7"
+          "sha256": "e9ff5bf4a563dd747fafdd51f140c9bba29c3da47a18dd7b1890b06d63e78154"
         }
       ]
     }

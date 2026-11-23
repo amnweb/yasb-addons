@@ -3,6 +3,5 @@
   "title": "Hardware monitor",
   "description": "CPU, memory and GPU usage on your bar, with network traffic in its popup",
   "version": 1,
-  "released": "2026-11-22",
-  "yasbApi": 1
+  "released": "2026-11-22"
 }

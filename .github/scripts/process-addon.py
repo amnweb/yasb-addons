@@ -1,5 +1,6 @@
 import datetime
 import difflib
+import fnmatch
 import html
 import io
 import json
@@ -13,10 +14,14 @@ import zipfile
 from functools import cache
 from pathlib import Path, PurePosixPath
 
-TYPES = {"Widget": "widgets", "Theme": "themes", "Layout": "layouts"}
+TYPES = {"Widget": "widgets", "Theme": "themes", "Layout": "layouts", "Config": "configs"}
 FOLDER_TYPES = {folder: kind for kind, folder in TYPES.items()}
 MANIFEST = "manifest.json"
-MANIFEST_KEYS = ("id", "title", "description", "version", "released", "yasbApi")
+CONFIG = "config.yaml"
+# What a config folder holds that YASB makes, or that is not part of the config
+LEFT_OUT_FOLDERS = {"__pycache__", ".git", "dumps"}
+LEFT_OUT_FILES = ("*.log", "*.log.*")
+MANIFEST_KEYS = ("id", "title", "description", "version", "released")
 README = "README.md"
 # The marker tells the change log apart from an About text with its own Changes heading
 CHANGES_HEADING = "<!-- changes -->\n## Changes\n"
@@ -24,8 +29,7 @@ ASSETS = "assets"
 SCREENSHOT = "screenshot.png"
 PALETTE = "palette.png"
 MAX_IMAGES = 5
-# A screenshot from 3:4 to 4:3 is cropped to a square
-MIN_RATIO, MAX_RATIO = 3 / 4, 4 / 3
+SCREENSHOT_SIZE = 800
 JPEG_SIGNATURE = b"\xff\xd8\xff"
 FORMS = {"[submit-addon]:": "submit", "[update-addon]:": "update"}
 FORM_FIELDS = {
@@ -148,9 +152,9 @@ def one_line(manifest: dict, key: str, limit: int) -> str:
     return value
 
 
-def read_manifest(files: dict[str, bytes], author: str, yasb_api: int) -> dict:
+def read_manifest(files: dict[str, bytes], author: str) -> dict:
     if MANIFEST not in files:
-        raise SubmissionError(f"The ZIP file has no {MANIFEST} next to your QML file.")
+        raise SubmissionError(f"The ZIP file has no {MANIFEST} next to your other files.")
     try:
         manifest = json.loads(files[MANIFEST].decode("utf-8-sig"))
     except (UnicodeDecodeError, ValueError) as e:
@@ -159,7 +163,7 @@ def read_manifest(files: dict[str, bytes], author: str, yasb_api: int) -> dict:
         raise SubmissionError(f"{MANIFEST} must be a JSON object.")
     if missing := [key for key in MANIFEST_KEYS if key not in manifest]:
         raise SubmissionError(f"{MANIFEST} is missing: {', '.join(missing)}")
-    if unknown := [key for key in manifest if key not in MANIFEST_KEYS]:
+    if unknown := [key for key in manifest if key not in (*MANIFEST_KEYS, "type")]:
         raise SubmissionError(f"{MANIFEST} has unknown keys: {', '.join(unknown)}")
 
     match = ID_RE.fullmatch(manifest["id"]) if isinstance(manifest["id"], str) else None
@@ -187,9 +191,6 @@ def read_manifest(files: dict[str, bytes], author: str, yasb_api: int) -> dict:
     # UTC+14 is the first time zone to reach each day
     if date > datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=14))).date():
         raise SubmissionError(f"`released` in {MANIFEST} is in the future: {released}")
-
-    if manifest["yasbApi"] != yasb_api:
-        raise SubmissionError(f"`yasbApi` in {MANIFEST} must be {yasb_api}, the API of the current YASB.")
     return manifest
 
 
@@ -204,6 +205,24 @@ def qml_file(files: dict[str, bytes], name: str, folder: str) -> str:
     if folder == "themes" and (others := sorted(set(files) - {found, MANIFEST})):
         raise SubmissionError(f"A theme is one QML file and {MANIFEST}, but the ZIP file also has: {', '.join(others)}")
     return found
+
+
+def config_files(files: dict[str, bytes]) -> dict[str, bytes]:
+    """A config's files without those YASB makes or that belong to its author's PC."""
+    if CONFIG not in files:
+        raise SubmissionError(f"The ZIP file has no {CONFIG} next to {MANIFEST}.")
+    if secrets := sorted(file for file in files if PurePosixPath(file).name.lower().startswith(".env")):
+        raise SubmissionError(f"A config can't include .env files, they can hold your keys: {', '.join(secrets)}")
+    kept = {}
+    for file, content in files.items():
+        *folders, filename = PurePosixPath(file).parts
+        if LEFT_OUT_FOLDERS.intersection(folders) or any(fnmatch.fnmatch(filename.lower(), g) for g in LEFT_OUT_FILES):
+            continue
+        # With the manifest of a copied built-in widget, YASB would replace the copy when it updates its own
+        if filename == MANIFEST and len(folders) == 2 and folders[0] == "widgets" and "." not in folders[1]:
+            continue
+        kept[file] = content
+    return kept
 
 
 def find_addon(login: str, name: str) -> Path | None:
@@ -229,8 +248,8 @@ def download_images(urls: list[str], field: str, limit: int) -> list[tuple[bytes
 
 
 def square_screenshot(data: bytes) -> bytes:
-    """The screenshot cropped to a square around its middle, as PNG."""
-    from PyQt6.QtCore import QBuffer, QIODevice
+    """The screenshot as PNG, cropped to a square around its middle and scaled down."""
+    from PyQt6.QtCore import QBuffer, QIODevice, Qt
     from PyQt6.QtGui import QImage
 
     qml_engine()
@@ -238,21 +257,17 @@ def square_screenshot(data: bytes) -> bytes:
     if image.isNull():
         raise SubmissionError("The screenshot could not be read as an image.")
     width, height = image.width(), image.height()
-    if not MIN_RATIO <= width / height <= MAX_RATIO:
-        raise SubmissionError(f"The screenshot is {width}x{height}. It must be square or close to it, from 3:4 to 4:3.")
     side = min(width, height)
+    if side < SCREENSHOT_SIZE:
+        raise SubmissionError(
+            f"The screenshot is {width}x{height}. It must be at least {SCREENSHOT_SIZE}x{SCREENSHOT_SIZE}."
+        )
+    image = image.copy((width - side) // 2, (height - side) // 2, side, side)
+    image = image.scaled(SCREENSHOT_SIZE, SCREENSHOT_SIZE, transformMode=Qt.TransformationMode.SmoothTransformation)
     buffer = QBuffer()
     buffer.open(QIODevice.OpenModeFlag.WriteOnly)
-    image.copy((width - side) // 2, (height - side) // 2, side, side).save(buffer, "PNG")
+    image.save(buffer, "PNG")
     return bytes(buffer.data())
-
-
-def yasb_modules(src: Path) -> int:
-    """Puts YASB's source on the path and returns its API version."""
-    sys.path.insert(0, str(src.resolve()))
-    from settings import SERVICE_API_VERSION  # type: ignore
-
-    return SERVICE_API_VERSION[0]
 
 
 @cache
@@ -270,17 +285,40 @@ def qml_engine():
     return app, engine
 
 
-def qml_errors(path: Path) -> list[str]:
-    """Why the QML file does not compile against YASB's modules. It is never created, so none of it runs."""
+def qml_errors(path: Path, root: Path) -> list[str]:
+    """Why the QML file in root does not compile against YASB's modules. It is never created, so none of it runs."""
     from PyQt6.QtCore import QUrl
     from PyQt6.QtQml import QQmlComponent
 
     component = QQmlComponent(qml_engine()[1], QUrl.fromLocalFile(str(path.resolve())))
-    prefix = QUrl.fromLocalFile(str(path.parent.resolve())).toString() + "/"
+    prefix = QUrl.fromLocalFile(str(root.resolve())).toString() + "/"
     errors = [error.toString().replace(prefix, "") for error in component.errors()]
     if not errors and component.status() != QQmlComponent.Status.Ready:
         errors = [f"{path.name} did not load."]
     return errors
+
+
+def config_errors(root: Path) -> list[str]:
+    """Why the config does not work in YASB, read with YASB's own code from the folder YASB_CONFIG_HOME names."""
+    from core.config import ConfigError, load_config
+    from core.theme_files import DEFAULT_THEME, config_qml_file
+    from core.widget_files import outdated_widgets, undefined_widgets
+
+    try:
+        config = load_config()
+    except ConfigError as e:
+        return [f"{CONFIG}: {e.details or e}"]
+    errors = [f"{CONFIG}: there is no widget {name}" for name in undefined_widgets(config)]
+    errors += [f"widgets/{name}: {problem}" for name, problem in outdated_widgets(config).items()]
+    named = {("layouts", bar.layout) for bar in config.bars.values()}
+    named |= {("themes", bar.theme) for bar in config.bars.values()}
+    for folder, name in sorted((folder, name) for folder, name in named if name and name.lower() != DEFAULT_THEME):
+        path = config_qml_file(name, root.resolve() / folder)
+        if not path.is_file() or not path.resolve().is_relative_to(root.resolve()):
+            errors.append(f"{CONFIG}: there is no {folder[:-1]} {name} in the ZIP file")
+    for path in sorted(root.rglob("*.qml")):
+        errors += qml_errors(path, root)
+    return list(dict.fromkeys(errors))
 
 
 def theme_colors(path: Path, scheme) -> dict:
@@ -438,13 +476,13 @@ def process() -> None:
         raise SubmissionError("The issue was not opened with the Submit an addon or Update an addon form.")
     fields = parse_issue_body(issue.get("body") or "", FORM_FIELDS[form])
     author = os.environ["ADDON_AUTHOR"]
-    yasb_api = yasb_modules(Path(os.environ.get("YASB_SRC", "yasb-repo/src")))
+    sys.path.insert(0, str(Path(os.environ.get("YASB_SRC", "yasb-repo/src")).resolve()))
 
     zip_urls = extract_urls(fields.get("files", ""))
     if len(zip_urls) != 1:
         raise SubmissionError(f"Please upload one ZIP file in the Files field (found {len(zip_urls)}).")
     files = read_zip(download(zip_urls[0], "Files"))
-    manifest = read_manifest(files, author, yasb_api)
+    manifest = read_manifest(files, author)
     login, name = manifest["id"].split(".")
     addon = find_addon(login, name)
     released = versions(addon) if addon is not None else []
@@ -452,7 +490,7 @@ def process() -> None:
     if form == "submit":
         kind = fields.get("type", "")
         if kind not in TYPES:
-            raise SubmissionError(f"Please choose Widget, Theme or Layout in the Type field (found '{kind}').")
+            raise SubmissionError(f"Please choose {', '.join(TYPES)} in the Type field (found '{kind}').")
         if addon is not None:
             raise SubmissionError(
                 f"{manifest['id']} already exists. To publish a new version, use the Update an addon form."
@@ -469,27 +507,35 @@ def process() -> None:
             )
         if not changes:
             raise SubmissionError("Please write what changed in this version in the What changed field.")
+    if manifest.get("type", kind.lower()) != kind.lower():
+        raise SubmissionError(f"`type` in {MANIFEST} is {manifest['type']}, but this addon is a {kind.lower()}.")
     about = fields.get("about", "")
     if form == "submit" and not about:
         raise SubmissionError("Please write a few words about your addon in the About field.")
-    main_file = qml_file(files, name, folder)
+    addon = Path(folder, login, name)
+    target = addon / str(manifest["version"])
+    target.mkdir(parents=True)
+    main_file = "The config"
+    if folder == "configs":
+        # YASB reads it when its modules are first loaded
+        os.environ["YASB_CONFIG_HOME"] = str(target.resolve())
+        files = config_files(files)
+    else:
+        main_file = qml_file(files, name, folder)
 
     shot_urls = extract_urls(fields.get("screenshot", ""))
     shot = square_screenshot(download_images(shot_urls, "Screenshot", 1)[0][0]) if shot_urls else None
     if form == "submit" and shot is None and folder != "themes":
         raise SubmissionError(
-            "Please upload a screenshot in the Screenshot field: it is required for a widget or layout."
+            "Please upload a screenshot in the Screenshot field: it is required for a widget, layout or config."
         )
     images = download_images(extract_urls(fields.get("images", "")), "Images", MAX_IMAGES)
 
-    addon = Path(folder, login, name)
-    target = addon / str(manifest["version"])
-    target.mkdir(parents=True)
     for file, content in files.items():
         (target / file).parent.mkdir(parents=True, exist_ok=True)
         (target / file).write_bytes(content)
 
-    if errors := qml_errors(target / main_file):
+    if errors := config_errors(target) if folder == "configs" else qml_errors(target / main_file, target):
         raise SubmissionError(f"{main_file} does not load in YASB:\n" + "\n".join(errors))
 
     with zipfile.ZipFile(target / f"{name}.zip", "w", zipfile.ZIP_DEFLATED) as archive:

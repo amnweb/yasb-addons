@@ -2,7 +2,7 @@ import hashlib
 import json
 from pathlib import Path
 
-TYPES = {"widgets": "widget", "themes": "theme", "layouts": "layout"}
+TYPES = {"widgets": "widget", "themes": "theme", "layouts": "layout", "configs": "config"}
 MANIFEST = "manifest.json"
 INDEX = Path("index.json")
 
@@ -25,7 +25,6 @@ def read_addon(addon: Path, kind: str) -> dict | None:
             {
                 "version": int(folder.name),
                 "released": manifest["released"],
-                "yasbApi": manifest["yasbApi"],
                 "sha256": hashlib.sha256((folder / f"{name}.zip").read_bytes()).hexdigest(),
             }
             for folder, manifest in zip(folders, manifests, strict=True)

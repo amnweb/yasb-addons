@@ -5,6 +5,7 @@ on:
       - 'widgets/**'
       - 'themes/**'
       - 'layouts/**'
+      - 'configs/**'
 
 permissions:
   contents: read
@@ -26,9 +27,9 @@ jobs:
         run: |
           status=0
           while IFS= read -r file; do
-            if [[ "$file" =~ ^(widgets|themes|layouts)/[^/]+/[^/]+/[0-9]+/ ]] && git cat-file -e "$BASE_SHA:${BASH_REMATCH[0]%/}" 2>/dev/null; then
+            if [[ "$file" =~ ^(widgets|themes|layouts|configs)/[^/]+/[^/]+/[0-9]+/ ]] && git cat-file -e "$BASE_SHA:${BASH_REMATCH[0]%/}" 2>/dev/null; then
               echo "::error file=$file::${BASH_REMATCH[0]%/} is a released version, its files can't change"
               status=1
             fi
-          done < <(git diff --name-only "$BASE_SHA" HEAD -- widgets themes layouts)
+          done < <(git diff --name-only "$BASE_SHA" HEAD -- widgets themes layouts configs)
           exit $status

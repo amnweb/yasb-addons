@@ -1,5 +1,5 @@
 name: Submit an addon
-description: Add a new widget, theme or layout to the addon library.
+description: Add a new widget, theme, layout or config to the addon library.
 title: "[submit-addon]: "
 labels: ["addon"]
 body:
@@ -11,6 +11,7 @@ body:
         - Widget
         - Theme
         - Layout
+        - Config
     validations:
       required: true
   - type: upload
@@ -18,12 +19,8 @@ body:
     attributes:
       label: Files
       description: >-
-        A ZIP file with your `manifest.json` and your QML.
-        For a widget or layout, compress its folder, or the files themselves (`Clock.qml`, its other files and
-        `manifest.json`).
-        For a theme, compress its one `.qml` file and `manifest.json`.
-        The `id` in `manifest.json` must be `<your GitHub login>.<name>` in lower case, and the main QML file must be
-        named after `<name>`, such as `Clock.qml` for `yourlogin.clock`. `.exe` and `.dll` files are not accepted.
+        A ZIP file with your addon and its `manifest.json`.
+        [How to make it](https://github.com/amnweb/yasb-addons/blob/main/CONTRIBUTING.md)
     validations:
       required: true
       accept: ".zip"
@@ -32,12 +29,14 @@ body:
     attributes:
       label: About
       description: >-
-        What your addon is, how to use it and what it needs. This text becomes the README of your addon.
-        Markdown is supported.
+        What your addon is, what it needs, and what people have to change to use it. This text becomes the README of
+        your addon. Markdown is supported.
       placeholder: |
         A clock with the date in its popup. Click it to open the calendar.
 
         Needs the Segoe Fluent Icons font.
+
+        Change your city in Clock.qml, line 12.
     validations:
       required: true
   - type: upload
@@ -45,8 +44,8 @@ body:
     attributes:
       label: Screenshot
       description: >-
-        One image of your addon, square or close to it (from 3:4 to 4:3); it is cropped to a square.
-        Required for a widget or layout. For a theme it is optional: a palette of its colours is made for it.
+        A square image, screenshot ot logo, at least 800x800. We resize it to 800x800, and crop it if it is not square.
+        Not needed for a theme, we generate one.
     validations:
       required: false
       accept: ".png,.jpg,.jpeg"
@@ -69,8 +68,7 @@ body:
           "title": "Clock",
           "description": "A clock with the date in its popup",
           "version": 1,
-          "released": "2026-11-22",
-          "yasbApi": 1
+          "released": "2026-11-22"
         }
         ```
 

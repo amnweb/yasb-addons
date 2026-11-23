@@ -1,5 +1,5 @@
 name: Update an addon
-description: Publish a new version of a widget, theme or layout you submitted before.
+description: Publish a new version of a widget, theme, layout or config you submitted before.
 title: "[update-addon]: "
 labels: ["addon-update"]
 body:
@@ -29,7 +29,9 @@ body:
     id: screenshot
     attributes:
       label: Screenshot
-      description: A new image of your addon, from 3:4 to 4:3. Leave it empty to keep the current one.
+      description: >-
+        A new square image, at least 800x800. We resize it to 800x800, and crop it if it is not square. Leave it empty
+        to keep the current one.
     validations:
       required: false
       accept: ".png,.jpg,.jpeg"

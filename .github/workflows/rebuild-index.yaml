@@ -6,6 +6,7 @@ on:
       - 'widgets/**'
       - 'themes/**'
       - 'layouts/**'
+      - 'configs/**'
   workflow_dispatch:
 
 env:

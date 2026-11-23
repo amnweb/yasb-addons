@@ -1,6 +1,7 @@
 # YASB Addons
 
-Widgets, themes and layouts for [YASB](https://github.com/amnweb/yasb) 3.0 and later, made and shared by the community.
+Widgets, themes, layouts and full configs for [YASB](https://github.com/amnweb/yasb) 3.0 and later, made and shared by
+the community.
 
 Every addon here has been checked against YASB and reviewed before it was added. You can install any of them from
 YASB with `yasbc addons install <id>`, and update them the same way later.
