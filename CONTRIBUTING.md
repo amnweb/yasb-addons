@@ -91,9 +91,25 @@ yasbc addons install john.weather
 
 ## 3. Update it later
 
-1. Change your files.
-2. In `manifest.json`, change `"version": 1` to `"version": 2`.
-3. Make a new ZIP and send it with the form **[Update an addon](../../issues/new?template=update-addon.yaml)**.
+1. Change your files. Keep the same `id`.
+2. In `manifest.json`, raise `version` above the last one, for example from `1` to `2`, and set `released` to today's
+   date.
+3. Make a new ZIP of the folder.
+4. Open the form **[Update an addon](../../issues/new?template=update-addon.yaml)** with the GitHub account you sent the
+   addon from. The `id` starts with your GitHub name, so only you can update your addon.
+5. Upload the ZIP.
+6. In **What changed**, write what is new or fixed in this version. It goes at the top of the change log in your addon's
+   README, under the new version number.
+7. A new screenshot and new images are optional. New images replace all the current ones. Leave the fields empty to keep
+   what you have.
+8. Submit the form.
+
+You get an answer in a few minutes, as with your first version. Once we add it, people get it with
+`yasbc addons update`.
+
+The rest of your README, with what you wrote in **About**, stays as it was when you first sent the addon. An update
+can't change it. To change it, open a pull request that edits your addon's README, such as
+`widgets/john/weather/README.md`. Change only the text above `## Changes`.
 
 ---
 

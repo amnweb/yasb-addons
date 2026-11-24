@@ -20,11 +20,6 @@ body:
       description: What is new or fixed in this version. It is added to the change log in your addon's README.
     validations:
       required: true
-  - type: textarea
-    id: about
-    attributes:
-      label: About
-      description: A new text for the README of your addon. Leave it empty to keep the current one.
   - type: upload
     id: screenshot
     attributes:

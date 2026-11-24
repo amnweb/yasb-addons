@@ -37,7 +37,6 @@ FORM_FIELDS = {
     "update": {
         "Files": "files",
         "What changed": "changes",
-        "About": "about",
         "Screenshot": "screenshot",
         "Images": "images",
     },
@@ -409,10 +408,11 @@ def text_lines(data: bytes) -> list[str]:
 
 
 def write_readme(path: Path, manifest: dict, about: str, changes: str) -> None:
-    """Title, description and About, then the versions newest first; a new About replaces only the text above them."""
+    """Title, description and About, then the versions newest first. The text above them is written once, when the
+    addon is submitted, and an update only adds its version."""
     old = path.read_text(encoding="utf-8") if path.is_file() else ""
     head, _, log = old.partition(CHANGES_HEADING)
-    if about:
+    if not old:
         install = f"```\nyasbc addons install {manifest['id']}\n```"
         head = f"# {manifest['title']}\n\n{manifest['description']}\n\n{install}\n\n{about}"
     entry = f"\n### Version {manifest['version']} ({manifest['released']})\n\n{changes or 'Initial release'}\n"
