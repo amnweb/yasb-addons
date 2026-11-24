@@ -27,6 +27,20 @@
           "sha256": "e9ff5bf4a563dd747fafdd51f140c9bba29c3da47a18dd7b1890b06d63e78154"
         }
       ]
+    },
+    {
+      "id": "amnweb.pomodoro",
+      "type": "widget",
+      "author": "amnweb",
+      "title": "Pomodoro",
+      "description": "A focus timer with short and long breaks, and a toast and a sound when each part ends",
+      "versions": [
+        {
+          "version": 1,
+          "released": "2026-11-24",
+          "sha256": "18faeeb2fc3c124d2604470ffc46edfddd1bd18d1855e745e9e4567455a19a27"
+        }
+      ]
     }
   ]
 }
