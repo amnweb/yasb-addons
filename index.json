@@ -39,6 +39,11 @@
           "version": 1,
           "released": "2026-11-24",
           "sha256": "18faeeb2fc3c124d2604470ffc46edfddd1bd18d1855e745e9e4567455a19a27"
+        },
+        {
+          "version": 2,
+          "released": "2026-11-24",
+          "sha256": "0135fa1cf605fa68ae16cee3536d48cf1b53c25f309e5c426a7d874c6bcec90e"
         }
       ]
     }
