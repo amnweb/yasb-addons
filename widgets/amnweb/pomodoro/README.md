@@ -37,6 +37,10 @@ You can delete the file at any time to start fresh. Updating the widget also res
 <!-- changes -->
 ## Changes
 
+### Version 2 (2026-11-24)
+
+Fixed the shared timer. Now all bars read from the same .ini file.
+
 ### Version 1 (2026-11-24)
 
 Initial release
