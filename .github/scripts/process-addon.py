@@ -389,8 +389,23 @@ def write_palette(path: Path, out: Path) -> None:
                 color.name(hex_format),
             )
     painter.end()
+    # Square like a screenshot: scaled to fit, with each half's background filling the rest of its side
+    square = QImage(SCREENSHOT_SIZE, SCREENSHOT_SIZE, QImage.Format.Format_ARGB32_Premultiplied)
+    painter = QPainter(square)
+    for number, colors in enumerate(sections):
+        background = QColor(colors["background"])
+        background.setAlpha(255)
+        painter.fillRect(0, number * SCREENSHOT_SIZE // 2, SCREENSHOT_SIZE, SCREENSHOT_SIZE // 2, background)
+    fitted = image.scaled(
+        SCREENSHOT_SIZE,
+        SCREENSHOT_SIZE,
+        Qt.AspectRatioMode.KeepAspectRatio,
+        Qt.TransformationMode.SmoothTransformation,
+    )
+    painter.drawImage((SCREENSHOT_SIZE - fitted.width()) // 2, (SCREENSHOT_SIZE - fitted.height()) // 2, fitted)
+    painter.end()
     out.parent.mkdir(parents=True, exist_ok=True)
-    image.save(str(out), "PNG")
+    square.save(str(out), "PNG")
 
 
 def source_files(folder: Path | None, name: str) -> dict[str, bytes]:
@@ -523,7 +538,8 @@ def process() -> None:
     else:
         main_file = qml_file(files, name, folder)
 
-    shot_urls = extract_urls(fields.get("screenshot", ""))
+    # A theme's picture is its palette, so a screenshot uploaded for one is left out
+    shot_urls = extract_urls(fields.get("screenshot", "")) if folder != "themes" else []
     shot = square_screenshot(download_images(shot_urls, "Screenshot", 1)[0][0]) if shot_urls else None
     if form == "submit" and shot is None and folder != "themes":
         raise SubmissionError(

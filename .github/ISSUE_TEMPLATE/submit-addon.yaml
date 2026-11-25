@@ -30,7 +30,8 @@ body:
       label: About
       description: >-
         What your addon is, what it needs, and what people have to change to use it. This text becomes the README of
-        your addon. Markdown is supported.
+        your addon. Markdown is supported. **Don't use HTML tags or images here**, YASB leaves them out, upload your
+        screenshots in Screenshot and Images below.
       placeholder: |
         A clock with the date in its popup. Click it to open the calendar.
 
@@ -44,8 +45,9 @@ body:
     attributes:
       label: Screenshot
       description: >-
-        A square image, screenshot ot logo, at least 800x800. We resize it to 800x800, and crop it if it is not square.
-        Not needed for a theme, we generate one.
+        Your addon's picture, shown on its card and page in YASB's Addons window: a screenshot of it in use, or a logo
+        you made for it. **Required for a widget, layout or config.** Leave it empty for a theme, we make a picture of
+        its colours. PNG or JPG, at least 800x800. A wider or taller image is cropped to the square in its middle.
     validations:
       required: false
       accept: ".png,.jpg,.jpeg"

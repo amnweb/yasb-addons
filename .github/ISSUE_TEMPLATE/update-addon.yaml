@@ -17,7 +17,10 @@ body:
     id: changes
     attributes:
       label: What changed
-      description: What is new or fixed in this version. It is added to the change log in your addon's README.
+      description: >-
+        What is new or fixed in this version. It is added to the change log in your addon's README. Markdown is
+        supported. **Don't use HTML tags or images here**, YASB leaves them out, upload new screenshots in Screenshot
+        and Images below.
     validations:
       required: true
   - type: upload
@@ -25,8 +28,10 @@ body:
     attributes:
       label: Screenshot
       description: >-
-        A new square image, at least 800x800. We resize it to 800x800, and crop it if it is not square. Leave it empty
-        to keep the current one.
+        A new picture of your addon, shown on its card and page in YASB's Addons window: a screenshot of it in use, or a
+        logo you made for it. Leave it empty to keep the current one. Leave it empty for a theme too, we make a new
+        picture of its colours. PNG or JPG, at least 800x800. A wider or taller image is cropped to the square in its
+        middle.
     validations:
       required: false
       accept: ".png,.jpg,.jpeg"
@@ -34,7 +39,7 @@ body:
     id: images
     attributes:
       label: Images
-      description: New screenshots, at most 5; they replace all the current ones. Leave it empty to keep them.
+      description: New screenshots, at most 5, they replace all the current ones. Leave it empty to keep them.
     validations:
       required: false
       accept: ".png,.jpg,.jpeg"
