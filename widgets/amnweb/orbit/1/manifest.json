@@ -1,0 +1,8 @@
+{
+  "id": "amnweb.orbit",
+  "type": "widget",
+  "title": "Orbit",
+  "description": "A power menu whose actions burst from the bar into a ring of orbs. Hold one to run it, and the screen folds away like an old CRT",
+  "version": 1,
+  "released": "2026-11-26"
+}
