@@ -57,6 +57,20 @@
       ]
     },
     {
+      "id": "amnweb.orbit",
+      "type": "widget",
+      "author": "amnweb",
+      "title": "Orbit",
+      "description": "A power menu whose actions burst from the bar into a ring of orbs. Hold one to run it, and the screen folds away like an old CRT",
+      "versions": [
+        {
+          "version": 1,
+          "released": "2026-11-26",
+          "sha256": "6b9d994e5ad47e4efa6e50fc5b692c92229bfe601985d15441ba72952a6ce93e"
+        }
+      ]
+    },
+    {
       "id": "amnweb.pomodoro",
       "type": "widget",
       "author": "amnweb",
