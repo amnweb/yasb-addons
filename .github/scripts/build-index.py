@@ -5,6 +5,16 @@ from pathlib import Path
 TYPES = {"widgets": "widget", "themes": "theme", "layouts": "layout", "configs": "config"}
 MANIFEST = "manifest.json"
 INDEX = Path("index.json")
+COVER = "cover.png"
+PREVIEW = "preview-"
+
+
+def read_previews(assets: Path) -> list[str]:
+    previews = sorted(
+        (path for path in assets.glob(f"{PREVIEW}*") if path.stem.removeprefix(PREVIEW).isdigit()),
+        key=lambda path: int(path.stem.removeprefix(PREVIEW)),
+    )
+    return [path.name for path in previews]
 
 
 def read_addon(addon: Path, kind: str) -> dict | None:
@@ -21,6 +31,8 @@ def read_addon(addon: Path, kind: str) -> dict | None:
         "author": login,
         "title": manifests[-1]["title"],
         "description": manifests[-1]["description"],
+        "cover": COVER if (addon / "assets" / COVER).is_file() else "",
+        "previews": read_previews(addon / "assets"),
         "versions": [
             {
                 "version": int(folder.name),

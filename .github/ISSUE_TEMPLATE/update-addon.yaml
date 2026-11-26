@@ -19,14 +19,14 @@ body:
       label: What changed
       description: >-
         What is new or fixed in this version. It is added to the change log in your addon's README. Markdown is
-        supported. **Don't use HTML tags or images here**, YASB leaves them out, upload new screenshots in Screenshot
-        and Images below.
+        supported. **Don't use HTML tags or images here**, YASB leaves them out, upload new pictures in Cover and
+        Images below.
     validations:
       required: true
   - type: upload
-    id: screenshot
+    id: cover
     attributes:
-      label: Screenshot
+      label: Cover
       description: >-
         A new picture of your addon, shown on its card and page in YASB's Addons window: a screenshot of it in use, or a
         logo you made for it. Leave it empty to keep the current one. Leave it empty for a theme too, we make a new

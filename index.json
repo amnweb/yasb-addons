@@ -6,6 +6,8 @@
       "author": "amnweb",
       "title": "Catppuccin",
       "description": "Catppuccin Mocha in dark mode and Latte in light mode, with a mauve accent",
+      "cover": "cover.png",
+      "previews": [],
       "versions": [
         {
           "version": 1,
@@ -20,6 +22,8 @@
       "author": "amnweb",
       "title": "Claude Usage",
       "description": "Your Claude plan limits from Claude Code, with reset times, Claude status and the tokens Claude Code used by day, week, month and model",
+      "cover": "cover.png",
+      "previews": [],
       "versions": [
         {
           "version": 1,
@@ -34,6 +38,8 @@
       "author": "amnweb",
       "title": "Control Center",
       "description": "Quick settings in one popup, Wi-Fi, Bluetooth, do not disturb, microphone, volume, brightness, power plan and mode, and what is playing",
+      "cover": "cover.png",
+      "previews": [],
       "versions": [
         {
           "version": 1,
@@ -48,6 +54,8 @@
       "author": "amnweb",
       "title": "Hardware monitor",
       "description": "CPU, memory and GPU usage on your bar, with network traffic in its popup",
+      "cover": "cover.png",
+      "previews": [],
       "versions": [
         {
           "version": 1,
@@ -62,6 +70,10 @@
       "author": "amnweb",
       "title": "Orbit",
       "description": "A power menu whose actions burst from the bar into a ring of orbs. Hold one to run it, and the screen folds away like an old CRT",
+      "cover": "cover.png",
+      "previews": [
+        "preview-1.png"
+      ],
       "versions": [
         {
           "version": 1,
@@ -76,6 +88,8 @@
       "author": "amnweb",
       "title": "Pomodoro",
       "description": "A focus timer with short and long breaks, and a toast and a sound when each part ends",
+      "cover": "cover.png",
+      "previews": [],
       "versions": [
         {
           "version": 1,

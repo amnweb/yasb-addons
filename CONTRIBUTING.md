@@ -77,8 +77,9 @@ The file `manifest.json`:
 1. Make a ZIP of the folder.
 2. Open the form **[Submit an addon](../../issues/new?template=submit-addon.yaml)**.
 3. Choose the type: Widget, Theme, Layout or Config.
-4. Upload the ZIP and a screenshot. The screenshot is a square image, at least 800x800. We resize it to 800x800, and
-   crop it if it is not square. Not needed for a theme, we generate one.
+4. Upload the ZIP and a cover, the picture on your addon's card: a screenshot of it in use or a logo. The cover is a
+   square image, at least 800x800. We resize it to 800x800, and crop it if it is not square. Not needed for a theme, we
+   generate one.
 5. In **About**, write what your addon does, what it needs, and what people have to change, such as their city.
 6. Submit the form.
 
@@ -100,7 +101,7 @@ yasbc addons install john.weather
 5. Upload the ZIP.
 6. In **What changed**, write what is new or fixed in this version. It goes at the top of the change log in your addon's
    README, under the new version number.
-7. A new screenshot and new images are optional. New images replace all the current ones. Leave the fields empty to keep
+7. A new cover and new images are optional. New images replace all the current ones. Leave the fields empty to keep
    what you have.
 8. Submit the form.
 

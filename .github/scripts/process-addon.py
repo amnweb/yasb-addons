@@ -26,18 +26,18 @@ README = "README.md"
 # The marker tells the change log apart from an About text with its own Changes heading
 CHANGES_HEADING = "<!-- changes -->\n## Changes\n"
 ASSETS = "assets"
-SCREENSHOT = "screenshot.png"
-PALETTE = "palette.png"
+COVER = "cover.png"
+PREVIEW = "preview-"
 MAX_IMAGES = 5
-SCREENSHOT_SIZE = 800
+COVER_SIZE = 800
 JPEG_SIGNATURE = b"\xff\xd8\xff"
 FORMS = {"[submit-addon]:": "submit", "[update-addon]:": "update"}
 FORM_FIELDS = {
-    "submit": {"Type": "type", "Files": "files", "About": "about", "Screenshot": "screenshot", "Images": "images"},
+    "submit": {"Type": "type", "Files": "files", "About": "about", "Cover": "cover", "Images": "images"},
     "update": {
         "Files": "files",
         "What changed": "changes",
-        "Screenshot": "screenshot",
+        "Cover": "cover",
         "Images": "images",
     },
 }
@@ -246,23 +246,21 @@ def download_images(urls: list[str], field: str, limit: int) -> list[tuple[bytes
     return images
 
 
-def square_screenshot(data: bytes) -> bytes:
-    """The screenshot as PNG, cropped to a square around its middle and scaled down."""
+def square_cover(data: bytes) -> bytes:
+    """The cover as PNG, cropped to a square around its middle and scaled down."""
     from PyQt6.QtCore import QBuffer, QIODevice, Qt
     from PyQt6.QtGui import QImage
 
     qml_engine()
     image = QImage.fromData(data)
     if image.isNull():
-        raise SubmissionError("The screenshot could not be read as an image.")
+        raise SubmissionError("The cover could not be read as an image.")
     width, height = image.width(), image.height()
     side = min(width, height)
-    if side < SCREENSHOT_SIZE:
-        raise SubmissionError(
-            f"The screenshot is {width}x{height}. It must be at least {SCREENSHOT_SIZE}x{SCREENSHOT_SIZE}."
-        )
+    if side < COVER_SIZE:
+        raise SubmissionError(f"The cover is {width}x{height}. It must be at least {COVER_SIZE}x{COVER_SIZE}.")
     image = image.copy((width - side) // 2, (height - side) // 2, side, side)
-    image = image.scaled(SCREENSHOT_SIZE, SCREENSHOT_SIZE, transformMode=Qt.TransformationMode.SmoothTransformation)
+    image = image.scaled(COVER_SIZE, COVER_SIZE, transformMode=Qt.TransformationMode.SmoothTransformation)
     buffer = QBuffer()
     buffer.open(QIODevice.OpenModeFlag.WriteOnly)
     image.save(buffer, "PNG")
@@ -389,20 +387,20 @@ def write_palette(path: Path, out: Path) -> None:
                 color.name(hex_format),
             )
     painter.end()
-    # Square like a screenshot: scaled to fit, with each half's background filling the rest of its side
-    square = QImage(SCREENSHOT_SIZE, SCREENSHOT_SIZE, QImage.Format.Format_ARGB32_Premultiplied)
+    # Square like a cover: scaled to fit, with each half's background filling the rest of its side
+    square = QImage(COVER_SIZE, COVER_SIZE, QImage.Format.Format_ARGB32_Premultiplied)
     painter = QPainter(square)
     for number, colors in enumerate(sections):
         background = QColor(colors["background"])
         background.setAlpha(255)
-        painter.fillRect(0, number * SCREENSHOT_SIZE // 2, SCREENSHOT_SIZE, SCREENSHOT_SIZE // 2, background)
+        painter.fillRect(0, number * COVER_SIZE // 2, COVER_SIZE, COVER_SIZE // 2, background)
     fitted = image.scaled(
-        SCREENSHOT_SIZE,
-        SCREENSHOT_SIZE,
+        COVER_SIZE,
+        COVER_SIZE,
         Qt.AspectRatioMode.KeepAspectRatio,
         Qt.TransformationMode.SmoothTransformation,
     )
-    painter.drawImage((SCREENSHOT_SIZE - fitted.width()) // 2, (SCREENSHOT_SIZE - fitted.height()) // 2, fitted)
+    painter.drawImage((COVER_SIZE - fitted.width()) // 2, (COVER_SIZE - fitted.height()) // 2, fitted)
     painter.end()
     out.parent.mkdir(parents=True, exist_ok=True)
     square.save(str(out), "PNG")
@@ -538,12 +536,12 @@ def process() -> None:
     else:
         main_file = qml_file(files, name, folder)
 
-    # A theme's picture is its palette, so a screenshot uploaded for one is left out
-    shot_urls = extract_urls(fields.get("screenshot", "")) if folder != "themes" else []
-    shot = square_screenshot(download_images(shot_urls, "Screenshot", 1)[0][0]) if shot_urls else None
-    if form == "submit" and shot is None and folder != "themes":
+    # A theme's cover is its palette, so a cover uploaded for one is left out
+    cover_urls = extract_urls(fields.get("cover", "")) if folder != "themes" else []
+    cover = square_cover(download_images(cover_urls, "Cover", 1)[0][0]) if cover_urls else None
+    if form == "submit" and cover is None and folder != "themes":
         raise SubmissionError(
-            "Please upload a screenshot in the Screenshot field: it is required for a widget, layout or config."
+            "Please upload a picture in the Cover field: it is required for a widget, layout or config."
         )
     images = download_images(extract_urls(fields.get("images", "")), "Images", MAX_IMAGES)
 
@@ -560,15 +558,15 @@ def process() -> None:
     assets = addon / ASSETS
     assets.mkdir(exist_ok=True)
     if folder == "themes":
-        write_palette(target / main_file, assets / PALETTE)
-    if shot is not None:
-        (assets / SCREENSHOT).write_bytes(shot)
+        write_palette(target / main_file, assets / COVER)
+    if cover is not None:
+        (assets / COVER).write_bytes(cover)
     if images:
         for old in assets.iterdir():
-            if old.stem.isdigit():
+            if old.name.startswith(PREVIEW):
                 old.unlink()
         for number, (data, extension) in enumerate(images, 1):
-            (assets / f"{number}.{extension}").write_bytes(data)
+            (assets / f"{PREVIEW}{number}.{extension}").write_bytes(data)
     write_readme(addon / README, manifest, about, changes)
     write_diff(addon / str(previous) if previous is not None else None, target, name)
 

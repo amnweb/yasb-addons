@@ -31,7 +31,7 @@ body:
       description: >-
         What your addon is, what it needs, and what people have to change to use it. This text becomes the README of
         your addon. Markdown is supported. **Don't use HTML tags or images here**, YASB leaves them out, upload your
-        screenshots in Screenshot and Images below.
+        pictures in Cover and Images below.
       placeholder: |
         A clock with the date in its popup. Click it to open the calendar.
 
@@ -41,9 +41,9 @@ body:
     validations:
       required: true
   - type: upload
-    id: screenshot
+    id: cover
     attributes:
-      label: Screenshot
+      label: Cover
       description: >-
         Your addon's picture, shown on its card and page in YASB's Addons window: a screenshot of it in use, or a logo
         you made for it. **Required for a widget, layout or config.** Leave it empty for a theme, we make a picture of
