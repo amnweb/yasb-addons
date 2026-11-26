@@ -1,0 +1,8 @@
+{
+  "id": "amnweb.controlcenter",
+  "type": "widget",
+  "title": "Control Center",
+  "description": "Quick settings in one popup, Wi-Fi, Bluetooth, do not disturb, microphone, volume, brightness, power plan and mode, and what is playing",
+  "version": 1,
+  "released": "2026-11-26"
+}
