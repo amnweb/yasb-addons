@@ -1,0 +1,8 @@
+{
+  "id": "amnweb.claudeusage",
+  "type": "widget",
+  "title": "Claude Usage",
+  "description": "Your Claude plan limits from Claude Code, with reset times, Claude status and the tokens Claude Code used by day, week, month and model",
+  "version": 1,
+  "released": "2026-11-26"
+}
