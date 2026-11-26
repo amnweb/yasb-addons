@@ -29,6 +29,20 @@
       ]
     },
     {
+      "id": "amnweb.controlcenter",
+      "type": "widget",
+      "author": "amnweb",
+      "title": "Control Center",
+      "description": "Quick settings in one popup, Wi-Fi, Bluetooth, do not disturb, microphone, volume, brightness, power plan and mode, and what is playing",
+      "versions": [
+        {
+          "version": 1,
+          "released": "2026-11-26",
+          "sha256": "25f1fd8da1e57a78c88342b1dac3892f7ed7b57a24665f1a404be7a136379ec2"
+        }
+      ]
+    },
+    {
       "id": "amnweb.hwmonitor",
       "type": "widget",
       "author": "amnweb",
