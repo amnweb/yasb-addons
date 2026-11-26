@@ -15,6 +15,20 @@
       ]
     },
     {
+      "id": "amnweb.claudeusage",
+      "type": "widget",
+      "author": "amnweb",
+      "title": "Claude Usage",
+      "description": "Your Claude plan limits from Claude Code, with reset times, Claude status and the tokens Claude Code used by day, week, month and model",
+      "versions": [
+        {
+          "version": 1,
+          "released": "2026-11-26",
+          "sha256": "abc2119142d151c07334bb9a6392e9f979b3437ffda4b31b7e049c96d97fef6a"
+        }
+      ]
+    },
+    {
       "id": "amnweb.hwmonitor",
       "type": "widget",
       "author": "amnweb",
